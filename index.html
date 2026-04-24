@@ -1,35 +1,35 @@
 <!DOCTYPE html>
-<!DOCTYPE html>
 <html>
 <head>
-<title>GPS Auto Submit</title>
+<meta charset="UTF-8">
+<title>GPS Auto Submit App</title>
 
 <style>
   body {
     font-family: Arial;
-    background: #f4f6f8;
+    background: linear-gradient(135deg, #eef2f7, #d9e4f5);
     text-align: center;
     padding-top: 100px;
   }
 
   .card {
     background: white;
-    width: 320px;
+    width: 340px;
     margin: auto;
     padding: 25px;
     border-radius: 12px;
-    box-shadow: 0 0 12px rgba(0,0,0,0.1);
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
   }
 
   #timer {
-    font-size: 40px;
+    font-size: 42px;
     color: #007bff;
     margin: 15px 0;
   }
 
   #status {
     font-size: 14px;
-    color: #333;
+    color: #444;
   }
 </style>
 </head>
@@ -37,28 +37,25 @@
 <body>
 
 <div class="card">
-  <h3>Location Tracker</h3>
-  <p>Auto submitting your location...</p>
+  <h3>GPS Tracker</h3>
+  <p>Capturing location automatically...</p>
 
   <div id="timer">5</div>
   <p id="status">Starting...</p>
 </div>
 
-<!-- Hidden iframe (prevents page redirect during submit) -->
-<iframe name="hidden_iframe" style="display:none;"></iframe>
-
 <script>
-let count = 5;
+let timeLeft = 5;
 const timerEl = document.getElementById("timer");
 const statusEl = document.getElementById("status");
 
-// Countdown timer
-const interval = setInterval(() => {
-  count--;
-  timerEl.innerHTML = count;
+// Countdown before GPS capture
+const countdown = setInterval(() => {
+  timeLeft--;
+  timerEl.innerHTML = timeLeft;
 
-  if (count === 0) {
-    clearInterval(interval);
+  if (timeLeft === 0) {
+    clearInterval(countdown);
     getLocation();
   }
 }, 1000);
@@ -70,7 +67,7 @@ function getLocation() {
     return;
   }
 
-  statusEl.innerHTML = "Getting location...";
+  statusEl.innerHTML = "Getting GPS...";
 
   navigator.geolocation.getCurrentPosition(function(pos) {
 
@@ -78,43 +75,29 @@ function getLocation() {
     const lon = pos.coords.longitude;
     const time = new Date().toLocaleString();
 
-    // Google Maps link
     const mapLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
 
-    // Final formatted data
-    const value =
+    const finalData =
       "Latitude: " + lat +
       " | Longitude: " + lon +
       " | Time: " + time +
       " | Map: " + mapLink;
 
-    statusEl.innerHTML = "Submitting data...";
+    statusEl.innerHTML = "Submitting...";
 
-    // Create form dynamically
-    const form = document.createElement("form");
-    form.method = "POST";
-    form.action = "https://docs.google.com/forms/d/e/1FAIpQLSd4KJoIXicff1vBOAH1VgmFNBFUcGBSxf6iQE08eqOSWAXC_w/formResponse";
-    form.target = "hidden_iframe";
+    // SUBMIT TO GOOGLE FORM
+    const formURL = "https://docs.google.com/forms/d/e/1FAIpQLSd4KJoIXicff1vBOAH1VgmFNBFUcGBSxf6iQE08eqOSWAXC_w/formResponse";
 
-    // Your Google Form field
-    const input = document.createElement("input");
-    input.type = "hidden";
-    input.name = "entry.1341563402";
-    input.value = value;
+    const data = new FormData();
+    data.append("entry.1341563402", finalData);
 
-    form.appendChild(input);
-    document.body.appendChild(form);
-
-    // Submit to Google Form
-    form.submit();
+    fetch(formURL, {
+      method: "POST",
+      body: data,
+      mode: "no-cors"
+    });
 
     statusEl.innerHTML = "✅ Submitted successfully";
-
-    // Redirect AFTER submission
-    setTimeout(() => {
-      window.location.href =
-        "https://docs.google.com/forms/d/e/1FAIpQLSd4KJoIXicff1vBOAH1VgmFNBFUcGBSxf6iQE08eqOSWAXC_w/viewform";
-    }, 1500);
 
   }, function(err) {
     statusEl.innerHTML = "❌ Error: " + err.message;
@@ -124,4 +107,3 @@ function getLocation() {
 
 </body>
 </html>
-🎯 W
