@@ -1,29 +1,30 @@
 <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
-<title>Location Capture</title>
+<title>GPS Auto Submit</title>
 
 <style>
   body {
     font-family: Arial;
-    text-align: center;
     background: #f4f6f8;
+    text-align: center;
     padding-top: 100px;
   }
 
-  .box {
+  .card {
     background: white;
-    padding: 25px;
-    border-radius: 10px;
     width: 320px;
     margin: auto;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 0 12px rgba(0,0,0,0.1);
   }
 
   #timer {
-    font-size: 35px;
-    margin: 15px 0;
+    font-size: 40px;
     color: #007bff;
+    margin: 15px 0;
   }
 
   #status {
@@ -35,27 +36,26 @@
 
 <body>
 
-<div class="box">
-  <h3>Location Capture</h3>
-  <p>Submitting automatically...</p>
+<div class="card">
+  <h3>Location Tracker</h3>
+  <p>Auto submitting your location...</p>
 
   <div id="timer">5</div>
   <p id="status">Starting...</p>
 </div>
 
-<!-- Hidden iframe (prevents redirect during submit) -->
+<!-- Hidden iframe (prevents page redirect during submit) -->
 <iframe name="hidden_iframe" style="display:none;"></iframe>
 
 <script>
 let count = 5;
-
-const timer = document.getElementById("timer");
-const status = document.getElementById("status");
+const timerEl = document.getElementById("timer");
+const statusEl = document.getElementById("status");
 
 // Countdown timer
-let interval = setInterval(() => {
+const interval = setInterval(() => {
   count--;
-  timer.innerHTML = count;
+  timerEl.innerHTML = count;
 
   if (count === 0) {
     clearInterval(interval);
@@ -66,11 +66,11 @@ let interval = setInterval(() => {
 function getLocation() {
 
   if (!navigator.geolocation) {
-    status.innerHTML = "Geolocation not supported";
+    statusEl.innerHTML = "Geolocation not supported";
     return;
   }
 
-  status.innerHTML = "Getting location...";
+  statusEl.innerHTML = "Getting location...";
 
   navigator.geolocation.getCurrentPosition(function(pos) {
 
@@ -81,20 +81,22 @@ function getLocation() {
     // Google Maps link
     const mapLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
 
-    // Final formatted value
+    // Final formatted data
     const value =
       "Latitude: " + lat +
       " | Longitude: " + lon +
       " | Time: " + time +
       " | Map: " + mapLink;
 
-    status.innerHTML = "Submitting...";
+    statusEl.innerHTML = "Submitting data...";
 
+    // Create form dynamically
     const form = document.createElement("form");
     form.method = "POST";
     form.action = "https://docs.google.com/forms/d/e/1FAIpQLSd4KJoIXicff1vBOAH1VgmFNBFUcGBSxf6iQE08eqOSWAXC_w/formResponse";
     form.target = "hidden_iframe";
 
+    // Your Google Form field
     const input = document.createElement("input");
     input.type = "hidden";
     input.name = "entry.1341563402";
@@ -103,21 +105,23 @@ function getLocation() {
     form.appendChild(input);
     document.body.appendChild(form);
 
+    // Submit to Google Form
     form.submit();
 
-    status.innerHTML = "✅ Submitted successfully";
+    statusEl.innerHTML = "✅ Submitted successfully";
 
-    // Redirect after submission
+    // Redirect AFTER submission
     setTimeout(() => {
       window.location.href =
         "https://docs.google.com/forms/d/e/1FAIpQLSd4KJoIXicff1vBOAH1VgmFNBFUcGBSxf6iQE08eqOSWAXC_w/viewform";
     }, 1500);
 
   }, function(err) {
-    status.innerHTML = "❌ Error: " + err.message;
+    statusEl.innerHTML = "❌ Error: " + err.message;
   });
 }
 </script>
 
 </body>
 </html>
+🎯 W
