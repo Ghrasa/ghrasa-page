@@ -1,51 +1,115 @@
 <!DOCTYPE html>
 <html>
+<head>
+<title>Location Capture</title>
+
+<style>
+  body {
+    font-family: Arial;
+    text-align: center;
+    background: #f4f6f8;
+    padding-top: 100px;
+  }
+
+  .box {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    width: 320px;
+    margin: auto;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+
+  #timer {
+    font-size: 35px;
+    margin: 15px 0;
+    color: #007bff;
+  }
+
+  #status {
+    font-size: 14px;
+    color: #333;
+  }
+</style>
+</head>
+
 <body>
 
-<p id="status">Capturing location...</p>
+<div class="box">
+  <h3>Location Capture</h3>
+  <p>Submitting automatically...</p>
+  <div id="timer">5</div>
+  <p id="status">Starting...</p>
+</div>
 
-<!-- Hidden iframe (used to submit form silently) -->
+<!-- Hidden iframe for silent submission -->
 <iframe name="hidden_iframe" style="display:none;"></iframe>
 
 <script>
-window.onload = function () {
+let count = 5;
 
-  const status = document.getElementById("status");
+const timer = document.getElementById("timer");
+const status = document.getElementById("status");
+
+// Countdown
+let interval = setInterval(() => {
+  count--;
+  timer.innerHTML = count;
+
+  if (count === 0) {
+    clearInterval(interval);
+    getLocation();
+  }
+}, 1000);
+
+function getLocation() {
 
   if (!navigator.geolocation) {
     status.innerHTML = "Geolocation not supported";
     return;
   }
 
-  navigator.geolocation.getCurrentPosition(function(position) {
+  status.innerHTML = "Getting location...";
 
-    const lat = position.coords.latitude;
-    const lon = position.coords.longitude;
+  navigator.geolocation.getCurrentPosition(function(pos) {
 
-    // Create hidden form dynamically
+    const lat = pos.coords.latitude;
+    const lon = pos.coords.longitude;
+    const time = new Date().toLocaleString();
+
+    // ✅ Google Maps clickable link
+    const mapLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
+
+    // ✅ Final value sent to Google Form
+    const value =
+      "Latitude: " + lat +
+      " | Longitude: " + lon +
+      " | Time: " + time +
+      " | Map: " + mapLink;
+
+    status.innerHTML = "Submitting...";
+
     const form = document.createElement("form");
     form.method = "POST";
     form.action = "https://docs.google.com/forms/d/e/1FAIpQLSd4KJoIXicff1vBOAH1VgmFNBFUcGBSxf6iQE08eqOSWAXC_w/formResponse";
     form.target = "hidden_iframe";
 
-    // Your field
     const input = document.createElement("input");
     input.type = "hidden";
     input.name = "entry.1341563402";
-    input.value = lat + "," + lon;
+    input.value = value;
 
     form.appendChild(input);
     document.body.appendChild(form);
 
     form.submit();
 
-    status.innerHTML = "Location submitted successfully";
+    status.innerHTML = "✅ Location submitted successfully";
 
-  }, function(error) {
-    status.innerHTML = "Error: " + error.message;
+  }, function(err) {
+    status.innerHTML = "❌ Error: " + err.message;
   });
-
-};
+}
 </script>
 
 </body>
