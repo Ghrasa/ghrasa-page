@@ -1,5 +1,8 @@
+<!DOCTYPE html>
+<html>
+<head>
 <meta charset="UTF-8">
-<title>GPS Tracker</title>
+<title>GPS Auto Submit System</title>
 
 <style>
   body {
@@ -11,21 +14,25 @@
 
   .card {
     background: white;
-    width: 340px;
+    width: 360px;
     margin: auto;
     padding: 25px;
     border-radius: 12px;
     box-shadow: 0 0 15px rgba(0,0,0,0.1);
   }
 
-  #timer {
-    font-size: 42px;
-    color: #007bff;
+  #status {
+    margin-top: 10px;
+    font-size: 14px;
   }
 
-  #status {
-    font-size: 14px;
-    margin-top: 10px;
+  button {
+    padding: 10px 15px;
+    border: none;
+    background: #007bff;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
   }
 </style>
 </head>
@@ -33,54 +40,43 @@
 <body>
 
 <div class="card">
-  <h3>GPS Tracker</h3>
-  <p>Submitting your location...</p>
+  <h3>GPS Location Submit</h3>
+  <p>Click to start tracking</p>
 
-  <div id="timer">5</div>
-  <p id="status">Starting...</p>
+  <button onclick="start()">Start Capture</button>
+  <p id="status"></p>
 </div>
 
 <script>
-let t = 5;
-const timer = document.getElementById("timer");
-const status = document.getElementById("status");
+function start() {
+  const status = document.getElementById("status");
 
-const count = setInterval(() => {
-  t--;
-  timer.innerHTML = t;
-
-  if (t === 0) {
-    clearInterval(count);
-    getLocation();
-  }
-}, 1000);
-
-function getLocation() {
+  status.innerHTML = "Requesting location permission...";
 
   if (!navigator.geolocation) {
     status.innerHTML = "Geolocation not supported";
     return;
   }
 
-  status.innerHTML = "Getting location...";
+  navigator.geolocation.getCurrentPosition(success, error);
 
-  navigator.geolocation.getCurrentPosition(function(pos) {
+  function success(pos) {
 
     const lat = pos.coords.latitude;
     const lon = pos.coords.longitude;
     const time = new Date().toLocaleString();
 
-    const map = "https://www.google.com/maps?q=" + lat + "," + lon;
+    const mapLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
 
-    const value =
-      "Lat: " + lat +
-      " | Lon: " + lon +
+    const finalData =
+      "Latitude: " + lat +
+      " | Longitude: " + lon +
       " | Time: " + time +
-      " | Map: " + map;
+      " | Map: " + mapLink;
 
-    status.innerHTML = "Submitting...";
+    status.innerHTML = "Submitting data...";
 
-    // Create form
+    // REAL SUBMISSION TO GOOGLE FORM
     const form = document.createElement("form");
     form.method = "POST";
     form.action = "https://docs.google.com/forms/d/e/1FAIpQLSd4KJoIXicff1vBOAH1VgmFNBFUcGBSxf6iQE08eqOSWAXC_w/formResponse";
@@ -89,7 +85,7 @@ function getLocation() {
     const input = document.createElement("input");
     input.type = "hidden";
     input.name = "entry.1341563402";
-    input.value = value;
+    input.value = finalData;
 
     form.appendChild(input);
     document.body.appendChild(form);
@@ -98,15 +94,16 @@ function getLocation() {
 
     status.innerHTML = "Redirecting...";
 
-    // ⬇️ FIXED REDIRECT (important delay)
+    // FINAL REDIRECT BACK TO YOUR FORM
     setTimeout(() => {
       window.location.href =
         "https://docs.google.com/forms/d/e/1FAIpQLSd4KJoIXicff1vBOAH1VgmFNBFUcGBSxf6iQE08eqOSWAXC_w/viewform";
     }, 2000);
+  }
 
-  }, function(err) {
-    status.innerHTML = "Error: " + err.message;
-  });
+  function error(err) {
+    status.innerHTML = "Permission denied or error: " + err.message;
+  }
 }
 </script>
 
@@ -115,4 +112,3 @@ function getLocation() {
 
 </body>
 </html>
-
