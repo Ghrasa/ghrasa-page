@@ -1,114 +1,114 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>GPS Auto Submit System</title>
+<title>Share Your Location</title>
 
 <style>
   body {
-    font-family: Arial;
-    background: #eef2f7;
-    text-align: center;
-    padding-top: 100px;
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
   }
 
   .card {
     background: white;
-    width: 360px;
-    margin: auto;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    text-align: center;
+    width: 320px;
   }
 
-  #status {
-    margin-top: 10px;
+  h2 {
+    margin-bottom: 10px;
+  }
+
+  p {
+    color: #666;
     font-size: 14px;
   }
 
   button {
-    padding: 10px 15px;
+    margin-top: 20px;
+    padding: 12px 20px;
     border: none;
-    background: #007bff;
+    border-radius: 10px;
+    background: #4facfe;
     color: white;
-    border-radius: 6px;
+    font-size: 16px;
     cursor: pointer;
+    transition: 0.3s;
+  }
+
+  button:hover {
+    background: #007bff;
+  }
+
+  .status {
+    margin-top: 15px;
+    font-size: 13px;
+    color: green;
+  }
+
+  .loader {
+    display: none;
+    margin-top: 10px;
   }
 </style>
-</head>
 
+</head>
 <body>
 
 <div class="card">
-  <h3>GPS Location Submit</h3>
-  <p>Click to start tracking</p>
+  <h2>📍 Share Location</h2>
+  <p>Click below to securely share your location.</p>
 
-  <button onclick="start()">Start Capture</button>
-  <p id="status"></p>
+  <button onclick="getLocation()">Capture Location</button>
+
+  <div class="loader" id="loader">⏳ Getting location...</div>
+  <div class="status" id="status"></div>
 </div>
 
 <script>
-function start() {
-  const status = document.getElementById("status");
+function getLocation() {
+  document.getElementById("loader").style.display = "block";
+  document.getElementById("status").innerHTML = "";
 
-  status.innerHTML = "Requesting location permission...";
-
-  if (!navigator.geolocation) {
-    status.innerHTML = "Geolocation not supported";
-    return;
-  }
-
-  navigator.geolocation.getCurrentPosition(success, error);
-
-  function success(pos) {
-
-    const lat = pos.coords.latitude;
-    const lon = pos.coords.longitude;
-    const time = new Date().toLocaleString();
-
-    const mapLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
-
-    const finalData =
-      "Latitude: " + lat +
-      " | Longitude: " + lon +
-      " | Time: " + time +
-      " | Map: " + mapLink;
-
-    status.innerHTML = "Submitting data...";
-
-    // REAL SUBMISSION TO GOOGLE FORM
-    const form = document.createElement("form");
-    form.method = "POST";
-    form.action = "https://docs.google.com/forms/d/e/1FAIpQLSd4KJoIXicff1vBOAH1VgmFNBFUcGBSxf6iQE08eqOSWAXC_w/formResponse";
-    form.target = "hidden_iframe";
-
-    const input = document.createElement("input");
-    input.type = "hidden";
-    input.name = "entry.1341563402";
-    input.value = finalData;
-
-    form.appendChild(input);
-    document.body.appendChild(form);
-
-    form.submit();
-
-    status.innerHTML = "Redirecting...";
-
-    // FINAL REDIRECT BACK TO YOUR FORM
-    setTimeout(() => {
-      window.location.href =
-        "https://docs.google.com/forms/d/e/1FAIpQLSd4KJoIXicff1vBOAH1VgmFNBFUcGBSxf6iQE08eqOSWAXC_w/viewform";
-    }, 2000);
-  }
-
-  function error(err) {
-    status.innerHTML = "Permission denied or error: " + err.message;
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(sendToForm, showError);
+  } else {
+    alert("Geolocation not supported");
   }
 }
-</script>
 
-<!-- hidden iframe -->
-<iframe name="hidden_iframe" style="display:none;"></iframe>
+function sendToForm(position) {
+  var lat = position.coords.latitude;
+  var lon = position.coords.longitude;
+
+  // ✅ Create Google Maps link
+  var mapsLink = "https://maps.google.com/?q=" + lat + "," + lon;
+
+  // ✅ Your prefilled form link
+  var prefilledURL = "https://docs.google.com/forms/d/e/1FAIpQLSeuSbHfaQh2riG8V7AfnR_67b1hun3_FG9npgtqOXVdOyZwBw/viewform?usp=pp_url&entry.1346477846=TEST";
+
+  // 🔁 Replace TEST with encoded maps link
+  var finalURL = prefilledURL.replace("TEST", encodeURIComponent(mapsLink));
+
+  // 🚀 Redirect to Google Form with filled data
+  window.location.href = finalURL;
+}
+
+function showError(error) {
+  document.getElementById("loader").style.display = "none";
+  document.getElementById("status").style.color = "red";
+  document.getElementById("status").innerHTML = "❌ Permission denied or failed!";
+}
+</script>
 
 </body>
 </html>
